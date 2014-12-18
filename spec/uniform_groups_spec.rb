@@ -21,9 +21,15 @@ describe UniformGroups do
       }
     ]
 
+    expect(result.count).to eq(2)
+
     result.each_with_index do |group, index|
       expect(group).to eq(expected_groups[index])
     end
 
   end
+
+
+
+
 end

@@ -1,4 +1,7 @@
 require 'active_support/core_ext/enumerable'
+require 'active_support/core_ext/hash/slice'
+
+require 'uniform_groups/array_grouper'
 
 # source must be a Hash with Array values
 #   hash = {
@@ -17,34 +20,30 @@ class UniformGroups
     @source = hash.dup
     @groups_number = groups_number
     @header_ratio = options[:header_ratio] ||= 0
+
+    @grouped_keys = try_array
+  end
+
+  def try_array
+    grouper = ArrayGrouper.new(weights, @groups_number, keys)
+    grouper.group
+    grouper.grouped_keys
   end
 
   def each
-    group = {}
-    cur_count = index = 0
-
-    @source.each do |key, value|
-      cur_count += value.length + @header_ratio
-      group.merge!(key => value)
-
-      if cur_count >= (average_weight * (index + 1))
-        yield(group)
-        group = {}
-        index += 1
-      end
+    @grouped_keys.each do |keys|
+      yield @source.slice(*keys)
     end
-
-    yield(group) if index < @groups_number
   end
 
   private
 
-  def total_weight
-    headers_addition = @source.length * @header_ratio
-    @total_weight ||= @source.values.sum { |arr| arr.length } + headers_addition
+  def weights
+    @source.values.map { |v| v.length }
   end
 
-  def average_weight
-    total_weight / @groups_number.to_f
+  def keys
+    @source.keys
   end
+
 end
