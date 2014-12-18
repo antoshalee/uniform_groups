@@ -1,3 +1,5 @@
+require 'active_support/core_ext/enumerable'
+
 # source must be a Hash with Array values
 #   hash = {
 #     "A" => %w(Armenia Austria),
@@ -25,7 +27,7 @@ class UniformGroups
       cur_count += value.length + @header_ratio
       group.merge!(key => value)
 
-      if cur_count > (average_weight * (index + 1))
+      if cur_count >= (average_weight * (index + 1))
         yield(group)
         group = {}
         index += 1
@@ -39,7 +41,7 @@ class UniformGroups
 
   def total_weight
     headers_addition = @source.length * @header_ratio
-    @total_weight ||= @source.sum { |key, arr| arr.length } + headers_addition
+    @total_weight ||= @source.values.sum { |arr| arr.length } + headers_addition
   end
 
   def average_weight
