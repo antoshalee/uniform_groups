@@ -29,7 +29,4 @@ describe UniformGroups do
 
   end
 
-
-
-
 end
